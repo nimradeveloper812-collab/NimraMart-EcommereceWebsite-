@@ -1,0 +1,59 @@
+@model List<ECommerceApp.Models.Order>
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<div class="page-header">
+    <div>
+        <h3 class="section-title mb-1"><i class="bi bi-receipt me-2"></i>My Orders</h3>
+        <div class="title-divider"></div>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="empty-state">
+        <div class="empty-icon"><i class="bi bi-bag-x"></i></div>
+        <h5>No orders yet</h5>
+        <p>Place your first order to see it here.</p>
+        <a asp-controller="Product" asp-action="Index" class="btn btn-gold mt-3">
+            <i class="bi bi-grid me-2"></i>Start Shopping
+        </a>
+    </div>
+}
+else
+{
+    @foreach (var order in Model)
+    {
+        var statusColor = order.Status.ToString() switch {
+            "Pending"    => "var(--warning)",
+            "Processing" => "var(--info)",
+            "Shipped"    => "var(--gold)",
+            "Delivered"  => "var(--success)",
+            "Cancelled"  => "var(--danger)",
+            _            => "var(--text-muted)"
+        };
+        <div class="order-card fade-in-up">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                <div>
+                    <span style="font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;">Order #@order.Id</span>
+                    <h5 style="margin:0.2rem 0;font-size:1rem;">Rs. @order.TotalAmount.ToString("N0")</h5>
+                    <span style="font-size:0.85rem;color:var(--text-muted);">
+                        <i class="bi bi-calendar me-1"></i>@order.CreatedAt.ToString("MMM dd, yyyy")
+                    </span>
+                </div>
+                <div class="text-end">
+                    <span style="display:inline-block;padding:0.3em 0.85em;border-radius:50px;font-size:0.78rem;font-weight:600;color:@statusColor;border:1px solid @statusColor;background:transparent;">
+                        @order.Status
+                    </span>
+                    <div class="mt-2">
+                        <a asp-controller="Order" asp-action="Details" asp-route-id="@order.Id"
+                           class="btn btn-outline-dark btn-sm">
+                            <i class="bi bi-eye me-1"></i>View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}

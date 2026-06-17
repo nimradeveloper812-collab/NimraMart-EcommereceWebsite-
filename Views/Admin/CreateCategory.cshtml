@@ -1,0 +1,48 @@
+﻿@model ECommerceApp.Models.Category
+@{
+    ViewData["Title"] = "Add Category";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;">
+            <h4 class="section-title mb-4"><i class="bi bi-plus-circle me-2"></i>Add Category</h4>
+            <form asp-action="CreateCategory" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class="form-label">Category Name</label>
+                    <input asp-for="Name" class="form-control" required placeholder="e.g. Electronics" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea asp-for="Description" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Icon Class <small class="text-muted">(Bootstrap Icons)</small></label>
+                    <input asp-for="IconClass" class="form-control" placeholder="e.g. bi-phone" />
+                    <small class="text-muted">Visit <a href="https://icons.getbootstrap.com" target="_blank">icons.getbootstrap.com</a> to find icon names</small>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Category Image (Optional)</label>
+                    <input type="file" name="CategoryImage" class="form-control" accept="image/*" onchange="previewImg(this)" />
+                    <div class="mt-2" id="imgPreview"></div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-gold btn-lg flex-fill"><i class="bi bi-plus-lg me-1"></i>Create</button>
+                    <a asp-controller="Admin" asp-action="Categories" class="btn btn-outline-dark btn-lg">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    function previewImg(input) {
+        const div = document.getElementById('imgPreview');
+        div.innerHTML = '';
+        if (input.files && input.files[0]) {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(input.files[0]);
+            img.style = 'height:100px;border-radius:8px;border:2px solid #ccc;';
+            div.appendChild(img);
+        }
+    }
+</script>

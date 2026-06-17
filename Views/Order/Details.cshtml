@@ -1,0 +1,126 @@
+@model ECommerceApp.Models.Order
+@{
+    ViewData["Title"] = $"Order #{Model.Id}";
+    var statusColor = Model.Status.ToString() switch {
+        "Pending"    => "var(--warning)",
+        "Processing" => "var(--info)",
+        "Shipped"    => "var(--gold)",
+        "Delivered"  => "var(--success)",
+        "Cancelled"  => "var(--danger)",
+        _            => "var(--text-muted)"
+    };
+}
+
+<div class="page-header">
+    <div>
+        <h3 class="section-title mb-1">Order #@Model.Id</h3>
+        <div class="title-divider"></div>
+    </div>
+
+    <div class="mb-2">
+        <strong>Payment:</strong>
+        @if (Model.PaymentMethod == ECommerceApp.Models.PaymentMethod.Card)
+        {
+            <span class="badge bg-success ms-1">
+                <i class="bi bi-credit-card me-1"></i>Card •••• @Model.Last4Digits
+            </span>
+        }
+        else
+        {
+            <span class="badge bg-warning text-dark ms-1">
+                <i class="bi bi-cash-coin me-1"></i>Cash on Delivery
+            </span>
+        }
+        — <small style="color:var(--text-muted);">@Model.PaymentStatus</small>
+    </div>
+
+    <span class="order-status-badge" style="--status-color:@statusColor;">
+        @Model.Status
+    </span>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;">
+            <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);">
+                <h5 style="margin:0;font-size:1rem;"><i class="bi bi-box-seam me-2"></i>Order Items</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Unit Price</th>
+                            <th>Qty</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td style="font-weight:500;">@item.Product?.Name</td>
+                                <td style="color:var(--text-muted);">Rs. @item.UnitPrice.ToString("N0")</td>
+                                <td>@item.Quantity</td>
+                                <td class="price-tag">Rs. @((item.UnitPrice * item.Quantity).ToString("N0"))</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end" style="font-weight:700;color:var(--text);">Total</td>
+                            <td style="color:var(--gold);font-weight:700;font-size:1.05rem;">Rs. @Model.TotalAmount.ToString("N0")</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="cart-summary">
+            <h5 style="font-size:1rem;margin-bottom:1rem;"><i class="bi bi-info-circle me-2"></i>Order Info</h5>
+            <div class="profile-field">
+                <label>Placed On</label>
+                <span>@Model.CreatedAt.ToString("MMM dd, yyyy — hh:mm tt")</span>
+            </div>
+            <div class="profile-field">
+                <label>Order Status</label>
+                <span style="color:@statusColor;font-weight:600;">@Model.Status</span>
+            </div>
+            <div class="profile-field">
+                <label>Payment Status</label>
+                @if (Model.PaymentStatus == ECommerceApp.Models.PaymentStatus.Paid)
+                {
+                    <span style="color:var(--success);font-weight:600;">
+                        <i class="bi bi-check-circle-fill me-1"></i>Paid
+                    </span>
+                }
+                else
+                {
+                    <span style="color:var(--warning);font-weight:600;">
+                        <i class="bi bi-clock-fill me-1"></i>Unpaid — Pay on Delivery
+                    </span>
+                }
+            </div>
+
+            <div class="profile-field">
+                <label>Payment Method</label>
+                @if (Model.PaymentMethod == ECommerceApp.Models.PaymentMethod.Card)
+                {
+                    <span><i class="bi bi-credit-card me-1"></i>Card •••• @Model.Last4Digits</span>
+                }
+                else
+                {
+                    <span><i class="bi bi-cash-coin me-1"></i>Cash on Delivery</span>
+                }
+            </div>
+            <div class="profile-field">
+                <label><i class="bi bi-geo-alt me-1"></i>Shipping Address</label>
+                <span>@Model.ShippingAddress</span>
+            </div>
+        </div>
+        <a asp-controller="Order" asp-action="Index" class="btn btn-outline-dark w-100 mt-3">
+            <i class="bi bi-arrow-left me-1"></i>Back to Orders
+        </a>
+    </div>
+</div>

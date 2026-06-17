@@ -1,0 +1,92 @@
+@model ECommerceApp.Models.Product
+@{
+    ViewData["Title"] = "Add Product";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;">
+            <div class="page-header">
+                <h4 class="section-title mb-0"><i class="bi bi-plus-circle me-2"></i>Add New Product</h4>
+            </div>
+
+            <form asp-action="CreateProduct" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class="form-label">Product Name</label>
+                    <input asp-for="Name" class="form-control" required placeholder="e.g. Wireless Headphones" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea asp-for="Description" class="form-control" rows="3" placeholder="Product description..."></textarea>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label class="form-label">Price (Rs.)</label>
+                        <input asp-for="Price" class="form-control" type="number" min="0" step="0.01" required />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Stock</label>
+                        <input asp-for="Stock" class="form-control" type="number" min="0" required />
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Category</label>
+                    <select asp-for="CategoryId" class="form-select" required>
+                        <option value="">-- Select Category --</option>
+                        @foreach (var cat in ViewBag.Categories as List<ECommerceApp.Models.Category> ?? [])
+                        {
+                            <option value="@cat.Id">@cat.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- MAIN THUMBNAIL IMAGE -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">📷 Main Thumbnail Image</label>
+                    <input type="file" name="MainImage" class="form-control" accept="image/*" onchange="previewMain(this)" />
+                    <div class="mt-2" id="mainPreview"></div>
+                    <small class="text-muted">This will be the main product image shown in listings.</small>
+                </div>
+
+                <!-- EXTRA GALLERY IMAGES -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">🖼️ Additional Gallery Images (Optional)</label>
+                    <input type="file" name="ExtraImages" class="form-control" accept="image/*" multiple onchange="previewExtras(this)" />
+                    <div class="mt-2 d-flex flex-wrap gap-2" id="extraPreviews"></div>
+                    <small class="text-muted">You can select multiple images. Hold Ctrl to select more than one.</small>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-gold btn-lg flex-fill">
+                        <i class="bi bi-plus-lg me-1"></i>Create Product
+                    </button>
+                    <a asp-controller="Admin" asp-action="Products" class="btn btn-outline-dark btn-lg">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function previewMain(input) {
+        const div = document.getElementById('mainPreview');
+        div.innerHTML = '';
+        if (input.files && input.files[0]) {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(input.files[0]);
+            img.style = 'height:120px;border-radius:8px;border:2px solid #ccc;';
+            div.appendChild(img);
+        }
+    }
+
+    function previewExtras(input) {
+        const div = document.getElementById('extraPreviews');
+        div.innerHTML = '';
+        for (const file of input.files) {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.style = 'height:80px;border-radius:6px;border:2px solid #ccc;';
+            div.appendChild(img);
+        }
+    }
+</script>

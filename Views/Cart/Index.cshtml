@@ -1,0 +1,101 @@
+@model ECommerceApp.Models.ViewModels.CartViewModel
+@{
+    ViewData["Title"] = "My Cart";
+}
+
+<div class="page-header">
+    <div>
+        <h3 class="section-title mb-1"><i class="bi bi-cart3 me-2"></i>Shopping Cart</h3>
+        <div class="title-divider"></div>
+    </div>
+    @if (Model.Items.Any())
+    {
+        <span style="color:var(--text-muted);font-size:0.88rem;">@Model.ItemCount item(s)</span>
+    }
+</div>
+
+@if (!Model.Items.Any())
+{
+    <div class="empty-state">
+        <div class="empty-icon"><i class="bi bi-cart-x"></i></div>
+        <h5>Your cart is empty</h5>
+        <p>Add some products to get started.</p>
+        <a asp-controller="Product" asp-action="Index" class="btn btn-gold mt-3">
+            <i class="bi bi-grid me-2"></i>Browse Products
+        </a>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="cart-wrapper">
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Subtotal</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td>
+                                        <div style="font-weight:500;color:var(--text);">@item.ProductName</div>
+                                    </td>
+                                    <td style="color:var(--text-muted);">Rs. @item.UnitPrice.ToString("N0")</td>
+                                    <td>
+                                        <form asp-controller="Cart" asp-action="Remove" method="post">
+                                            <input type="hidden" name="productId" value="@item.ProductId" />
+                                            <button type="button" class="btn btn-sm btn-danger" title="Remove"
+                                                    data-confirm="Remove this item from your cart?"
+                                                    onclick="this.closest('form').submit()">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td class="price-tag">Rs. @item.Subtotal.ToString("N0")</td>
+                                    <td>
+                                        <form asp-controller="Cart" asp-action="Remove" method="post">
+                                            <input type="hidden" name="productId" value="@item.ProductId" />
+                                            <button class="btn btn-sm btn-danger" title="Remove">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="cart-summary">
+                <h5 style="color:var(--text);margin-bottom:1rem;font-size:1rem;">Order Summary</h5>
+                @foreach (var item in Model.Items)
+                {
+                    <div class="d-flex justify-content-between mb-2" style="font-size:0.88rem;">
+                        <span style="color:var(--text-muted);">@item.ProductName × @item.Quantity</span>
+                        <span style="color:var(--text);">Rs. @item.Subtotal.ToString("N0")</span>
+                    </div>
+                }
+                <div class="total-row d-flex justify-content-between">
+                    <span>Total</span>
+                    <span>Rs. @Model.Total.ToString("N0")</span>
+                </div>
+                <a asp-controller="Cart" asp-action="Checkout" class="btn btn-success btn-lg w-100 mt-3">
+                    <i class="bi bi-lock me-2"></i>Proceed to Checkout
+                </a>
+                <a asp-controller="Product" asp-action="Index" class="btn btn-outline-dark w-100 mt-2">
+                    <i class="bi bi-arrow-left me-1"></i>Continue Shopping
+                </a>
+            </div>
+        </div>
+    </div>
+}

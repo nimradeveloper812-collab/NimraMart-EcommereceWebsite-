@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - NimraMart</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+</head>
+<body>
+    @await Html.PartialAsync("_Navbar")
+
+    @if (TempData["Success"] != null)
+    {
+        <div id="toast-success" class="toast-modern toast-success show">
+            <div class="toast-icon"><i class="bi bi-check-circle-fill"></i></div>
+            <div class="toast-msg">@TempData["Success"]</div>
+            <button class="toast-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div id="toast-error" class="toast-modern toast-error show">
+            <div class="toast-icon"><i class="bi bi-exclamation-circle-fill"></i></div>
+            <div class="toast-msg">@TempData["Error"]</div>
+            <button class="toast-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>
+        </div>
+    }
+
+    <main class="container mt-4">
+        @RenderBody()
+    </main>
+
+    @await Html.PartialAsync("_Footer")
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+            // Auto-dismiss toasts
+            document.querySelectorAll('.toast-modern').forEach(function (el) {
+                setTimeout(function () {
+                    el.classList.add('hiding');
+                    setTimeout(() => el.remove(), 400);
+                }, 4000);
+            });
+
+            // Loading spinner on form submit
+            document.querySelectorAll('form').forEach(function (form) {
+                form.addEventListener('submit', function () {
+                    form.querySelectorAll('button[type="submit"]').forEach(function (btn) {
+                        btn.disabled = true;
+                        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Please wait...';
+                    });
+                });
+            });
+
+            // SweetAlert for all delete/danger confirmations
+            document.querySelectorAll('[data-confirm]').forEach(function (el) {
+                el.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const msg = el.getAttribute('data-confirm') || 'Are you sure?';
+                    const href = el.getAttribute('href');
+                    const form = el.closest('form');
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: msg,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, proceed',
+                        cancelButtonText: 'Cancel',
+                        background: '#171b26',
+                        color: '#e8e8ee',
+                        confirmButtonColor: '#c9a84c',
+                        cancelButtonColor: '#2a2f42',
+                        borderRadius: '14px'
+                    }).then(function (result) {
+                        if (result.isConfirmed) {
+                            if (href) window.location.href = href;
+                            else if (form) form.submit();
+                        }
+                    });
+                });
+            });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

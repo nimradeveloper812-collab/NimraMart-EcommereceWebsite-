@@ -1,0 +1,30 @@
+## .NET / ASP.NET Core
+bin/
+obj/
+publish/
+app/
+
+## Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+
+## dotnet tools local manifest (optional, comment out if you want to keep it)
+# dotnet-tools.json
+
+## Logs
+*.log
+
+## OS
+.DS_Store
+Thumbs.db

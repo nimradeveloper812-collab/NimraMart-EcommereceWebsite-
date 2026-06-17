@@ -1,0 +1,432 @@
+@{
+    var userName = Context.Session.GetString("UserName");
+    var role     = Context.Session.GetString("Role");
+    var cartCount = ViewBag.CartCount as int? ?? 0;
+}
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="sale-banner" id="saleBanner">
+        🔥 Summer Sale — Up to 40% OFF on selected items!
+        <a href="/Product/Index" class="ms-2">Shop Now</a>
+        <button class="sale-banner-close" onclick="document.getElementById('saleBanner').remove()">
+            <i class="bi bi-x"></i>
+        </button>
+    </div>
+
+    <div class="container">
+        <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+            <i class="bi bi-bag-heart-fill me-1"></i> NimraMart
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-3">
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-house me-1"></i>Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Product" asp-action="Index">
+                        <i class="bi bi-grid me-1"></i>Products
+                    </a>
+                </li>
+            </ul>
+
+            <!-- ── SEARCH BAR ── -->
+            <div class="search-wrapper me-auto" id="searchWrapper">
+                <div class="search-box">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" id="navSearchInput" class="search-input"
+                           placeholder="Search products, categories..."
+                           autocomplete="off" />
+                    <button class="search-clear" id="searchClear" style="display:none;">
+                        <i class="bi bi-x"></i>
+                    </button>
+                </div>
+                <!-- Suggestions Dropdown -->
+                <div class="search-dropdown" id="searchDropdown" style="display:none;">
+                    <div id="searchResults"></div>
+                    <div id="searchFooter" style="display:none;">
+                        <a href="#" id="searchAllLink" class="search-footer-link">
+                            <i class="bi bi-search me-1"></i>
+                            See all results for "<span id="searchQuery"></span>"
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <ul class="navbar-nav align-items-center">
+                @if (userName != null)
+                {
+                    <li class="nav-item">
+<a class="nav-link position-relative" asp-controller="Cart" asp-action="Index">
+    <i class="bi bi-cart3" style="font-size:1.3rem;vertical-align:middle;"></i>
+    @if (cartCount > 0)
+    {
+        <span style="
+            position:absolute;
+            top:-6px;
+            right:-8px;
+            background:var(--gold);
+            color:#0f1117;
+            font-size:0.68rem;
+            font-weight:700;
+            min-width:18px;
+            height:18px;
+            border-radius:50%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:0 4px;
+            line-height:1;
+        ">@cartCount</span>
+    }
+</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Order" asp-action="Index">
+                            <i class="bi bi-receipt me-1"></i>My Orders
+                        </a>
+                    </li>
+                    @if (role == "Admin")
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Admin" asp-action="Index" style="color:var(--gold) !important;">
+                                <i class="bi bi-gear me-1"></i>Admin
+                            </a>
+                        </li>
+                    }
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i>@userName
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile"><i class="bi bi-person me-2"></i>Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" asp-controller="Account" asp-action="Logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Login"><i class="bi bi-box-arrow-in-right me-1"></i>Login</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Register"><i class="bi bi-person-plus me-1"></i>Register</a></li>
+                }
+
+                <!-- ── THEME TOGGLE (inside nav list, right side) ── -->
+                <li class="nav-item ms-2">
+                    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                        <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- ── SEARCH STYLES ── -->
+<style>
+.search-wrapper {
+    position: relative;
+    max-width: 420px;
+    width: 100%;
+}
+.search-box {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50px;
+    padding: 0 1rem;
+    transition: all 0.2s;
+}
+.search-box:focus-within {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.07);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+}
+.search-icon {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+}
+.search-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 0.88rem;
+    width: 100%;
+    padding: 0.5rem 0;
+}
+.search-input::placeholder { color: var(--text-dim); }
+.search-clear {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 0;
+    font-size: 1rem;
+    line-height: 1;
+}
+.search-clear:hover { color: var(--text); }
+
+/* Dropdown */
+.search-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0; right: 0;
+    background: var(--bg-2);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    z-index: 9999;
+    overflow: hidden;
+    max-height: 480px;
+    overflow-y: auto;
+}
+.search-section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    padding: 0.75rem 1rem 0.25rem;
+}
+.search-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--text);
+    transition: background 0.15s;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.search-item:hover {
+    background: rgba(201,168,76,0.08);
+    color: var(--text);
+}
+.search-item img {
+    width: 40px; height: 40px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+    background: var(--bg-3);
+}
+.search-item-img-placeholder {
+    width: 40px; height: 40px;
+    border-radius: 8px;
+    background: var(--bg-3);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.1rem;
+    color: var(--gold);
+}
+.search-item-name {
+    font-size: 0.88rem;
+    font-weight: 500;
+    line-height: 1.2;
+}
+.search-item-meta {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+.search-item-price {
+    margin-left: auto;
+    font-size: 0.82rem;
+    color: var(--gold);
+    font-weight: 600;
+    flex-shrink: 0;
+}
+.search-footer-link {
+    display: block;
+    text-align: center;
+    padding: 0.75rem;
+    font-size: 0.83rem;
+    color: var(--gold);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    transition: background 0.15s;
+}
+.search-footer-link:hover {
+    background: rgba(201,168,76,0.07);
+    color: var(--gold-light);
+}
+.search-no-results {
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.88rem;
+}
+.search-loading {
+    padding: 1rem;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+}
+/* Theme toggle button */
+.theme-toggle {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--gold);
+    font-size: 1rem;
+    transition: background 0.2s, border-color 0.2s;
+    padding: 0;
+}
+.theme-toggle:hover {
+    background: rgba(201,168,76,0.15);
+    border-color: var(--gold);
+}
+</style>
+
+<!-- ── SEARCH SCRIPT ── -->
+<script>
+(function () {
+    const input     = document.getElementById('navSearchInput');
+    const dropdown  = document.getElementById('searchDropdown');
+    const results   = document.getElementById('searchResults');
+    const footer    = document.getElementById('searchFooter');
+    const allLink   = document.getElementById('searchAllLink');
+    const querySpan = document.getElementById('searchQuery');
+    const clearBtn  = document.getElementById('searchClear');
+
+    let debounceTimer = null;
+    let currentQuery  = '';
+
+    function showDropdown() { dropdown.style.display = 'block'; }
+    function hideDropdown() { dropdown.style.display = 'none'; footer.style.display = 'none'; }
+
+    function highlight(text, query) {
+        if (!query) return text;
+        const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return text.replace(new RegExp(`(${escaped})`, 'gi'),
+            '<mark style="background:rgba(201,168,76,0.3);color:var(--gold);border-radius:3px;padding:0 2px;">$1</mark>');
+    }
+
+    async function fetchSuggestions(q) {
+        results.innerHTML = '<div class="search-loading"><span class="spinner-border spinner-border-sm me-2"></span>Searching...</div>';
+        showDropdown();
+        try {
+            const res  = await fetch(`/Product/SearchSuggestions?q=${encodeURIComponent(q)}`);
+            const data = await res.json();
+
+            let html = '';
+
+            // Categories
+            if (data.categories && data.categories.length > 0) {
+                html += '<div class="search-section-title">Categories</div>';
+                data.categories.forEach(c => {
+                    html += `
+                    <a class="search-item" href="/Product/Index?categoryId=${c.id}">
+                        <div class="search-item-img-placeholder">
+                            <i class="bi ${c.icon}"></i>
+                        </div>
+                        <div>
+                            <div class="search-item-name">${highlight(c.name, q)}</div>
+                            <div class="search-item-meta">${c.count} products</div>
+                        </div>
+                    </a>`;
+                });
+            }
+
+            // Products
+            if (data.products && data.products.length > 0) {
+                html += '<div class="search-section-title">Products</div>';
+                data.products.forEach(p => {
+                    const imgHtml = p.image
+                        ? `<img src="${p.image}" alt="${p.name}" onerror="this.style.display='none'">`
+                        : `<div class="search-item-img-placeholder"><i class="bi bi-box-seam"></i></div>`;
+                    html += `
+                    <a class="search-item" href="/Product/Details/${p.id}">
+                        ${imgHtml}
+                        <div style="flex:1;min-width:0;">
+                            <div class="search-item-name">${highlight(p.name, q)}</div>
+                            <div class="search-item-meta">${p.category}</div>
+                        </div>
+                        <div class="search-item-price">Rs. ${p.price}</div>
+                    </a>`;
+                });
+            }
+
+            if (!html) {
+                html = `<div class="search-no-results">
+                    <i class="bi bi-search mb-2" style="font-size:1.5rem;display:block;color:var(--text-dim);"></i>
+                    No results for "<strong>${q}</strong>"
+                </div>`;
+                footer.style.display = 'none';
+            } else {
+                querySpan.textContent = q;
+                allLink.href = `/Product/Index?search=${encodeURIComponent(q)}`;
+                footer.style.display = 'block';
+            }
+
+            results.innerHTML = html;
+        } catch {
+            results.innerHTML = '<div class="search-no-results">Something went wrong.</div>';
+        }
+    }
+
+    input.addEventListener('input', function () {
+        const q = this.value.trim();
+        currentQuery = q;
+        clearBtn.style.display = q ? 'block' : 'none';
+        clearTimeout(debounceTimer);
+        if (q.length < 2) { hideDropdown(); return; }
+        debounceTimer = setTimeout(() => fetchSuggestions(q), 280);
+    });
+
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && currentQuery.length > 0) {
+            hideDropdown();
+            window.location.href = `/Product/Index?search=${encodeURIComponent(currentQuery)}`;
+        }
+        if (e.key === 'Escape') { hideDropdown(); input.blur(); }
+    });
+
+    clearBtn.addEventListener('click', function () {
+        input.value = '';
+        currentQuery = '';
+        clearBtn.style.display = 'none';
+        hideDropdown();
+        input.focus();
+    });
+
+    // Close on outside click
+    document.addEventListener('click', function (e) {
+        if (!document.getElementById('searchWrapper').contains(e.target)) {
+            hideDropdown();
+        }
+    });
+})();
+</script>
+
+<script>
+(function () {
+    const btn  = document.getElementById('themeToggle');
+    const icon = document.getElementById('themeIcon');
+    const saved = localStorage.getItem('shopease-theme') || 'dark';
+    applyTheme(saved);
+
+    btn.addEventListener('click', function () {
+        const current = document.documentElement.getAttribute('data-theme') || 'dark';
+        const next = current === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+        localStorage.setItem('shopease-theme', next);
+    });
+
+    function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        icon.className = theme === 'dark' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
+    }
+})();
+</script>

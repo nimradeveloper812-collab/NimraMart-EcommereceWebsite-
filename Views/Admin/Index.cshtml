@@ -1,0 +1,93 @@
+@model List<ECommerceApp.Models.Order>
+@{
+    ViewData["Title"] = "Admin — Orders";
+}
+
+<div class="page-header">
+    <div>
+        <h3 class="section-title mb-1"><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</h3>
+        <div class="title-divider"></div>
+    </div>
+    <a asp-controller="Admin" asp-action="Products" class="btn btn-gold btn-sm">
+        <i class="bi bi-box-seam me-1"></i>Manage Products
+    </a>
+</div>
+
+@{
+    var totalRevenue = Model.Where(o => o.Status != ECommerceApp.Models.OrderStatus.Cancelled).Sum(o => o.TotalAmount);
+    var pending      = Model.Count(o => o.Status == ECommerceApp.Models.OrderStatus.Pending);
+    var delivered    = Model.Count(o => o.Status == ECommerceApp.Models.OrderStatus.Delivered);
+}
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="admin-stat-card">
+            <div class="stat-value">@Model.Count</div>
+            <div class="stat-label">Total Orders</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="admin-stat-card">
+            <div class="stat-value">@pending</div>
+            <div class="stat-label">Pending</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="admin-stat-card">
+            <div class="stat-value">@delivered</div>
+            <div class="stat-label">Delivered</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="admin-stat-card">
+            <div class="stat-value" style="font-size:1.4rem;">Rs. @totalRevenue.ToString("N0")</div>
+            <div class="stat-label">Revenue</div>
+        </div>
+    </div>
+</div>
+
+<h5 style="color:var(--text);margin-bottom:1rem;">All Orders</h5>
+<div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;">
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model)
+                {
+                    <tr>
+                        <td style="color:var(--text-dim);">#@order.Id</td>
+                        <td style="font-weight:500;">@order.User?.FullName</td>
+                        <td class="price-tag">Rs. @order.TotalAmount.ToString("N0")</td>
+                        <td style="color:var(--text-muted);font-size:0.85rem;">@order.CreatedAt.ToString("MMM dd, yyyy")</td>
+                        <td>
+                            <span style="font-size:0.78rem;font-weight:600;padding:0.25em 0.7em;border-radius:50px;
+                                background:var(--bg-3);color:var(--text-muted);">@order.Status</span>
+                        </td>
+                        <td>
+                            <form asp-controller="Admin" asp-action="UpdateOrderStatus" method="post" class="d-flex gap-2">
+                                <input type="hidden" name="orderId" value="@order.Id" />
+                                <select name="status" class="form-select form-select-sm" style="width:140px;">
+                                    @foreach (var s in Enum.GetValues<ECommerceApp.Models.OrderStatus>())
+                                    {
+                                        <option value="@s" selected="@(s == order.Status)">@s</option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-gold btn-sm">
+                                    <i class="bi bi-check2"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,47 @@
+@model ECommerceApp.Models.Product
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="row g-4 fade-in-up">
+    <div class="col-md-5">
+        <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "https://placehold.co/600x450/1e2333/c9a84c?text=No+Image" : Model.ImageUrl)"
+             class="product-detail-img" alt="@Model.Name" />
+    </div>
+    <div class="col-md-7">
+        @if (Model.Category != null)
+        {
+            <span class="badge bg-secondary mb-3">@Model.Category.Name</span>
+        }
+        <h2 class="product-detail-title">@Model.Name</h2>
+        <p style="color:var(--text-muted);line-height:1.7;">@Model.Description</p>
+        <div class="product-price-large">Rs. @Model.Price.ToString("N0")</div>
+
+        @if (Model.Stock > 0)
+        {
+            <p class="stock-badge mb-4"><i class="bi bi-check-circle-fill me-1"></i>In Stock — @Model.Stock available</p>
+            <form asp-controller="Cart" asp-action="Add" method="post" class="d-flex gap-3 align-items-center">
+                <input type="hidden" name="productId" value="@Model.Id" />
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <label style="font-size:0.83rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Qty</label>
+                    <input type="number" name="quantity" value="1" min="1" max="@Model.Stock"
+                           class="form-control" style="width:90px;" />
+                </div>
+                <button type="submit" class="btn btn-gold btn-lg">
+                    <i class="bi bi-cart-plus me-2"></i>Add to Cart
+                </button>
+            </form>
+        }
+        else
+        {
+            <p style="color:var(--danger);font-weight:600;"><i class="bi bi-x-circle me-1"></i>Out of Stock</p>
+            <button class="btn btn-lg" disabled style="background:var(--bg-3);color:var(--text-dim);border:1px solid var(--border);">Unavailable</button>
+        }
+
+        <div class="mt-4" style="border-top:1px solid var(--border);padding-top:1rem;">
+            <a asp-controller="Product" asp-action="Index" class="btn-link">
+                <i class="bi bi-arrow-left me-1"></i>Back to Products
+            </a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,68 @@
+@model List<ECommerceApp.Models.Product>
+@{
+    ViewData["Title"] = "Manage Products";
+}
+
+<div class="page-header">
+    <div>
+        <h3 class="section-title mb-1"><i class="bi bi-box-seam me-2"></i>Products</h3>
+        <div class="title-divider"></div>
+    </div>
+    <a asp-controller="Admin" asp-action="CreateProduct" class="btn btn-gold btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>Add Product
+    </a>
+</div>
+
+<div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;">
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td style="color:var(--text-dim);">@p.Id</td>
+                        <td style="font-weight:500;">@p.Name</td>
+                        <td><span class="badge bg-secondary">@(p.Category?.Name ?? "—")</span></td>
+                        <td class="price-tag">Rs. @p.Price.ToString("N0")</td>
+                        <td>
+                            @if (p.Stock > 0)
+                            {
+                                <span class="stock-badge">@p.Stock</span>
+                            }
+                            else
+                            {
+                                <span style="color:var(--danger);font-size:0.82rem;font-weight:500;">Out of stock</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a asp-controller="Admin" asp-action="EditProduct" asp-route-id="@p.Id"
+                                   class="btn btn-outline-dark btn-sm">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form asp-controller="Admin" asp-action="DeleteProduct" method="post" id="deleteForm-@p.Id">
+                                    <input type="hidden" name="id" value="@p.Id" />
+                                    <button type="button" class="btn btn-danger btn-sm"
+                                            data-confirm="This will permanently delete this product."
+                                            onclick="this.closest('form').submit()">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

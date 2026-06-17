@@ -1,0 +1,265 @@
+@using X.PagedList
+@using X.PagedList.Mvc.Core
+@model IPagedList<ECommerceApp.Models.Product>
+
+@{
+    ViewData["Title"] = "Products";
+}
+
+<div class="page-header">
+    <div>
+        <h3 class="section-title mb-1">
+            @if (ViewBag.CategoryId != null)
+            {
+                <span>@(((List<ECommerceApp.Models.Category>)ViewBag.Categories)?.FirstOrDefault(c => c.Id == (int)ViewBag.CategoryId)?.Name ?? "Products")</span>
+            }
+            else
+            {
+                <span>All Products</span>
+            }
+        </h3>
+        <div class="title-divider"></div>
+    </div>
+    <form class="d-flex gap-2 search-form" method="get">
+        @if (ViewBag.CategoryId != null)
+        {
+            <input type="hidden" name="categoryId" value="@ViewBag.CategoryId" />
+        }
+        <input type="hidden" name="sortBy" value="@ViewBag.SortBy" />
+        <input class="form-control" type="search" name="search" placeholder="Search products..." value="@ViewBag.Search" />
+        <button class="btn btn-gold" type="submit"><i class="bi bi-search"></i></button>
+    </form>
+</div>
+
+<!-- Sort + Category Row -->
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+
+    <!-- Category Pills -->
+    <div class="d-flex flex-wrap gap-2">
+        <a asp-controller="Product" asp-action="Index" asp-route-sortBy="@ViewBag.SortBy"
+               class="btn btn-sm @(ViewBag.CategoryId == null ? "btn-gold" : "btn-outline-dark")">
+            All
+        </a>
+        @foreach (var cat in (ViewBag.Categories as List<ECommerceApp.Models.Category>) ?? new List<ECommerceApp.Models.Category>())
+        {
+            <a asp-controller="Product" asp-action="Index"
+                   asp-route-categoryId="@cat.Id"
+                   asp-route-sortBy="@ViewBag.SortBy"
+                   class="btn btn-sm @(ViewBag.CategoryId != null && (int)ViewBag.CategoryId == cat.Id ? "btn-gold" : "btn-outline-dark")">
+                <i class="bi @(cat.IconClass ?? "bi-tag") me-1"></i>@cat.Name
+            </a>
+        }
+    </div>
+
+    <!-- Sort Dropdown -->
+    <div class="dropdown">
+        <button class="btn btn-outline-dark btn-sm dropdown-toggle d-flex align-items-center gap-2"
+                type="button" data-bs-toggle="dropdown">
+            <i class="bi bi-sort-down"></i>
+            @{
+                var sortLabel = (string?)ViewBag.SortBy switch
+                {
+                    "price_asc" => "Price: Low → High",
+                    "price_desc" => "Price: High → Low",
+                    "latest" => "Latest Products",
+                    "best_selling" => "Best Selling",
+                    _ => "Sort By"
+                };
+            }
+            @sortLabel
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+            <li>
+                <a class="dropdown-item @(ViewBag.SortBy == null ? "active" : "")"
+                       asp-controller="Product" asp-action="Index"
+                       asp-route-categoryId="@ViewBag.CategoryId"
+                       asp-route-search="@ViewBag.Search">
+                    <i class="bi bi-sort-alpha-down me-2"></i>Default (A–Z)
+                </a>
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+                <a class="dropdown-item @(ViewBag.SortBy == "price_asc" ? "active" : "")"
+                       asp-controller="Product" asp-action="Index"
+                       asp-route-categoryId="@ViewBag.CategoryId"
+                       asp-route-search="@ViewBag.Search"
+                       asp-route-sortBy="price_asc">
+                    <i class="bi bi-arrow-up me-2"></i>Price: Low → High
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item @(ViewBag.SortBy == "price_desc" ? "active" : "")"
+                       asp-controller="Product" asp-action="Index"
+                       asp-route-categoryId="@ViewBag.CategoryId"
+                       asp-route-search="@ViewBag.Search"
+                       asp-route-sortBy="price_desc">
+                    <i class="bi bi-arrow-down me-2"></i>Price: High → Low
+                </a>
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+                <a class="dropdown-item @(ViewBag.SortBy == "latest" ? "active" : "")"
+                       asp-controller="Product" asp-action="Index"
+                       asp-route-categoryId="@ViewBag.CategoryId"
+                       asp-route-search="@ViewBag.Search"
+                       asp-route-sortBy="latest">
+                    <i class="bi bi-clock me-2"></i>Latest Products
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item @(ViewBag.SortBy == "best_selling" ? "active" : "")"
+                       asp-controller="Product" asp-action="Index"
+                       asp-route-categoryId="@ViewBag.CategoryId"
+                       asp-route-search="@ViewBag.Search"
+                       asp-route-sortBy="best_selling">
+                    <i class="bi bi-fire me-2"></i>Best Selling
+                </a>
+            </li>
+        </ul>
+    </div>
+
+</div>
+
+<!-- Category Filter Pills -->
+<div class="d-flex flex-wrap gap-2 mb-4">
+    <a asp-controller="Product" asp-action="Index"
+           class="btn btn-sm @(ViewBag.CategoryId == null ? "btn-gold" : "btn-outline-dark")">
+        All
+    </a>
+    @foreach (var cat in (ViewBag.Categories as List<ECommerceApp.Models.Category>) ?? new List<ECommerceApp.Models.Category>())
+    {
+        <a asp-controller="Product" asp-action="Index" asp-route-categoryId="@cat.Id"
+               class="btn btn-sm @(ViewBag.CategoryId != null && (int)ViewBag.CategoryId == cat.Id ? "btn-gold" : "btn-outline-dark")">
+            <i class="bi @(cat.IconClass ?? "bi-tag") me-1"></i>@cat.Name
+        </a>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="empty-state">
+        <div class="empty-icon"><i class="bi bi-search"></i></div>
+        <h5>No products found</h5>
+        <a asp-controller="Product" asp-action="Index" class="btn btn-outline-dark mt-2">Clear Filter</a>
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+        @foreach (var (p, i) in Model.Select((p, i) => (p, i)))
+        {
+            <div class="col fade-in-up fade-in-up-@(i % 4 + 1)">
+                <div class="card h-100">
+                    <div class="card-img-wrap">
+                        <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "https://placehold.co/400x280/1e2333/c9a84c?text=No+Image" : p.ImageUrl)"
+                             class="card-img-top" style="height:210px;object-fit:cover;" alt="@p.Name" />
+                        <div class="img-overlay">
+                            <a asp-controller="Product" asp-action="Details" asp-route-id="@p.Id"
+                                   class="btn btn-gold btn-sm">
+                                <i class="bi bi-eye me-1"></i>Quick View
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @if (p.Category != null)
+                        {
+                            <a asp-controller="Product" asp-action="Index" asp-route-categoryId="@p.Category.Id"
+                                   class="badge bg-secondary mb-2 text-decoration-none">
+                                <i class="bi @(p.Category.IconClass ?? "bi-tag") me-1"></i>@p.Category.Name
+                            </a>
+                        }
+                        <h6 class="card-title">@p.Name</h6>
+                        <p class="price-tag mb-1">Rs. @p.Price.ToString("N0")</p>
+                        @if (p.Stock > 0)
+                        {
+                            <span class="stock-badge"><i class="bi bi-check-circle me-1"></i>In Stock (@p.Stock)</span>
+                        }
+                        else
+                        {
+                            <span style="color:var(--danger);font-size:0.82rem;font-weight:500;"><i class="bi bi-x-circle me-1"></i>Out of Stock</span>
+                        }
+                    </div>
+                    <div class="card-footer d-flex gap-2">
+                        <a asp-controller="Product" asp-action="Details" asp-route-id="@p.Id"
+                           class="btn btn-outline-dark btn-sm flex-fill"><i class="bi bi-eye me-1"></i>Details</a>
+                        @if (p.Stock > 0)
+                        {
+                            <form asp-controller="Cart" asp-action="Add" method="post" class="flex-fill">
+                                <input type="hidden" name="productId" value="@p.Id" />
+                                <input type="hidden" name="quantity" value="1" />
+                                <button type="submit" class="btn btn-gold btn-sm w-100">
+                                    <i class="bi bi-cart-plus me-1"></i>Add
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+<!-- Pagination -->
+@if (Model.PageCount > 1)
+{
+    <div class="d-flex justify-content-center align-items-center gap-3 mt-5">
+
+        <!-- Info -->
+        <small class="text-muted">
+            Showing @Model.FirstItemOnPage–@Model.LastItemOnPage of @Model.TotalItemCount products
+        </small>
+
+        <!-- Pages -->
+        <nav>
+            <ul class="pagination pagination-sm mb-0">
+
+                <!-- Previous -->
+                <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                    <a class="page-link"
+                           asp-controller="Product" asp-action="Index"
+                           asp-route-page="@(Model.PageNumber - 1)"
+                           asp-route-categoryId="@ViewBag.CategoryId"
+                           asp-route-search="@ViewBag.Search"
+                           asp-route-sortBy="@ViewBag.SortBy">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+
+                <!-- Page Numbers -->
+                @for (int i = 1; i <= Model.PageCount; i++)
+                {
+                    if (i == 1 || i == Model.PageCount || (i >= Model.PageNumber - 2 && i <= Model.PageNumber + 2))
+                    {
+                        <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                            <a class="page-link"
+                                   asp-controller="Product" asp-action="Index"
+                                   asp-route-page="@i"
+                                   asp-route-categoryId="@ViewBag.CategoryId"
+                                   asp-route-search="@ViewBag.Search"
+                                   asp-route-sortBy="@ViewBag.SortBy">
+                                @i
+                            </a>
+                        </li>
+                    }
+                    else if (i == Model.PageNumber - 3 || i == Model.PageNumber + 3)
+                    {
+                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                    }
+                }
+
+                <!-- Next -->
+                <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                    <a class="page-link"
+                           asp-controller="Product" asp-action="Index"
+                           asp-route-page="@(Model.PageNumber + 1)"
+                           asp-route-categoryId="@ViewBag.CategoryId"
+                           asp-route-search="@ViewBag.Search"
+                           asp-route-sortBy="@ViewBag.SortBy">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+
+    </div>
+}
